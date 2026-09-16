@@ -121,19 +121,19 @@ pass:
 
 **Build/device testing status:** gameplay, UI and IAP were tested via Unity
 Editor Play Mode with the Android platform active (simulating a
-1080x2340-class portrait phone with a safe-area inset). A real `Build >
-Android` run was started from this exact commit to validate the full
-IL2CPP/Gradle pipeline: it progressed correctly through asset/shader
-compilation and deep into IL2CPP native compilation (500+ of ~2,100 object
-files, zero errors) before this write-up, but IL2CPP compiled at only a
-handful of files per minute on this machine, so the run did not finish
-within a practical amount of time and no `.apk` was produced yet. No
-physical device or emulator was available in this environment either way.
-Running a full build through to an installed `.apk` on real hardware is
-the concrete next step before calling this shippable - nothing found so
-far suggests it wouldn't succeed, it's purely a "let it finish on faster
-hardware, or trim unused build-time dependencies" problem (see next
-steps).
+1080x2340-class portrait phone with a safe-area inset).
+
+A real `Build > Android` run was also done from this exact commit and
+**succeeded**: `Builds/Android/MiniFactory.apk`, ~73 MB, IL2CPP,
+ARM64 + ARMv7, zero build errors (974 warnings, essentially all
+`com.unity.ai.inference`/Sentis shader-variant noise - see next steps).
+The full build took about 52 minutes end to end on this machine, most of
+it IL2CPP native compilation and Gradle's first-time dependency download.
+That `.apk` has **not** been installed and run on a physical device or
+emulator - none was available in this environment - so first-launch
+behavior (IAP init, safe-area insets, etc.) on real hardware is still
+unverified. Installing and running it on a device/emulator is the
+concrete next step before calling this shippable.
 
 ## Time spent / next steps
 
@@ -144,16 +144,17 @@ spans roughly 4 hours on 2026-09-16.
 
 **What's left / what I'd do next:**
 
-1. Let a full Android build finish (or run it on faster/dedicated build
-   hardware) and actually install + run the `.apk` on a device or emulator
-   - this hasn't happened yet (see above). Worth first checking whether
-   `com.unity.ai.assistant` / `com.unity.ai.inference` (Sentis), both
-   template leftovers unused by this game, are inflating IL2CPP build
-   time, and removing them if so.
-2. Fix the Android package name away from the Unity template default
+1. Install `Builds/Android/MiniFactory.apk` on a real device or emulator
+   and verify first-launch behavior - this hasn't happened yet (see
+   above).
+2. Remove `com.unity.ai.assistant` / `com.unity.ai.inference` (Sentis),
+   both unused template leftovers responsible for nearly all 974 build
+   warnings and likely a meaningful chunk of the ~52-minute build time and
+   ~73 MB APK size.
+3. Fix the Android package name away from the Unity template default
    before any real distribution.
-3. Pick and wire one bonus item - Firebase Remote Config is the most
+4. Pick and wire one bonus item - Firebase Remote Config is the most
    valuable given the `IConfigProvider` seam is already there for it.
-4. A couple of Play Mode tests around the mobile lifecycle
+5. A couple of Play Mode tests around the mobile lifecycle
    (pause -> resume -> offline income applied) would strengthen coverage
    beyond the pure-logic EditMode tests.
