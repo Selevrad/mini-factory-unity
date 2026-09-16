@@ -32,11 +32,7 @@
   получает клики только через старый (legacy) backend)
 
 Чтобы собрать: **File > Build Settings** (список сцен и платформа уже
-настроены) **> Build**, либо из CLI:
-
-```
-unity build /path/to/Fabric --target Android --allow-install
-```
+настроены) **> Build**.
 
 ## Архитектура
 
