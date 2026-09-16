@@ -73,6 +73,7 @@ crashlytics-build.properties
 # Unity Version Control (Plastic SCM) local metadata - this project also has UVCS
 # configured; git is used in parallel alongside it for this project.
 /.plastic/
+/ignore.conf
 
 # OS files
 .DS_Store
