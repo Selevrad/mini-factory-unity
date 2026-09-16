@@ -41,24 +41,24 @@ namespace MiniFactory.Runtime
         private void Refresh()
         {
             var factory = game.Factory;
-            balanceText.text = $"Balance: {factory.Balance:F0}";
+            balanceText.text = $"Баланс: {factory.Balance:F0}";
 
             double now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-            totalProductionText.text = $"Production: {factory.TotalProductionPerSecond(now):F1}/s";
+            totalProductionText.text = $"Производство: {factory.TotalProductionPerSecond(now):F1}/с";
 
             bool boostActive = factory.IsBoostActive(now);
             if (boostActive)
             {
                 double remaining = factory.BoostEndUnixTime - now;
-                boostStatusText.text = $"Boost active: {remaining:F0}s left";
-                boostButtonLabel.text = "Boost Active";
+                boostStatusText.text = $"Буст активен: осталось {remaining:F0}с";
+                boostButtonLabel.text = "Буст активен";
                 boostButton.interactable = false;
                 if (_boostButtonImage != null) _boostButtonImage.color = BoostActiveColor;
             }
             else
             {
-                boostStatusText.text = "Boost inactive";
-                boostButtonLabel.text = "Start Boost";
+                boostStatusText.text = "Буст неактивен";
+                boostButtonLabel.text = "Активировать буст";
                 boostButton.interactable = true;
                 if (_boostButtonImage != null) _boostButtonImage.color = BoostReadyColor;
             }

@@ -55,19 +55,19 @@ namespace MiniFactory.Runtime
             int currentLevel = _unlocked ? machine.Level : 0;
             if (!_unlocked)
             {
-                stateText.text = "Locked";
+                stateText.text = "Заблокировано";
                 productionText.text = "-";
                 actionCost = machine.Definition.unlockCost;
-                costText.text = $"Unlock: {actionCost:F0}";
-                actionButtonLabel.text = "Unlock";
+                costText.text = $"Открыть: {actionCost:F0}";
+                actionButtonLabel.text = "Открыть";
             }
             else
             {
-                stateText.text = $"Unlocked (Lv. {machine.Level})";
-                productionText.text = $"{machine.CurrentProduction:F1}/s";
+                stateText.text = $"Открыто (Ур. {machine.Level})";
+                productionText.text = $"{machine.CurrentProduction:F1}/с";
                 actionCost = machine.NextUpgradeCost;
-                costText.text = $"Upgrade: {actionCost:F0}";
-                actionButtonLabel.text = "Upgrade";
+                costText.text = $"Улучшить: {actionCost:F0}";
+                actionButtonLabel.text = "Улучшить";
             }
 
             Color rowColor = _unlocked ? UnlockedColor : LockedColor;
