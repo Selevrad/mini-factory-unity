@@ -1,113 +1,138 @@
-# AI Usage
+# Использование AI
 
-This project was built together with **Claude Code** (Claude Sonnet 5), used as a
-coding agent connected live to this Unity Editor via the Unity Pipeline MCP
-integration - not just for generating code snippets to paste in, but for directly
-writing scripts to disk, creating/wiring GameObjects and UI in the actual scene,
-running compiles and tests, driving Play Mode, and inspecting the console, all in
-the same session.
+Этот проект делался вместе с **Claude Code** (Claude Sonnet 5), который
+использовался как coding-агент, подключённый напрямую к этому Unity Editor
+через MCP-интеграцию Unity Pipeline — не просто для генерации фрагментов
+кода для вставки, а для непосредственной записи скриптов на диск,
+создания/настройки GameObject'ов и UI прямо в сцене, запуска компиляции и
+тестов, управления Play Mode и чтения консоли — всё в рамках одной сессии.
 
-## What was delegated to the AI
+## Что было делегировано AI
 
-Essentially the full implementation, end to end:
+По сути, вся реализация от начала до конца:
 
-- Architecture and all C# code: the `Config` / `Domain` / `Services` / `Runtime`
-  layering, the `Factory`/`Machine` economy model, the `IConfigProvider` /
-  `ISaveService` / `IAnalyticsProvider` / `IPurchasingService` abstractions and
-  their implementations.
-- Unity IAP v5 integration, including reading the installed package's own source
-  under `Library/PackageCache` to confirm the current (non-deprecated) API surface
-  rather than relying on possibly-stale training knowledge.
-- Building the scene UI (Canvas, SafeArea, machine rows, buttons, colors) directly
-  in the Editor through scripted Editor-API calls, not hand-authored YAML.
-- The 6 EditMode unit tests.
-- Android platform configuration (orientation, IL2CPP, ARM64, Active Input
+- Архитектура и весь C#-код: слои `Config` / `Domain` / `Services` /
+  `Runtime`, экономическая модель `Factory`/`Machine`, абстракции
+  `IConfigProvider` / `ISaveService` / `IAnalyticsProvider` /
+  `IPurchasingService` и их реализации.
+- Интеграция Unity IAP v5, включая чтение исходников установленного
+  пакета в `Library/PackageCache`, чтобы убедиться в актуальном
+  (неустаревшем) API, а не полагаться на возможно устаревшие знания.
+- Построение UI сцены (Canvas, SafeArea, строки машин, кнопки, цвета)
+  прямо в редакторе через скриптовые вызовы Editor API, а не
+  вручную написанный YAML.
+- 6 EditMode юнит-тестов.
+- Настройка Android-платформы (ориентация, IL2CPP, ARM64, Active Input
   Handling, Run In Background).
-- This Git history: branching, Conventional Commit messages, and the GitFlow
-  merge structure.
-- Diagnosing every bug listed below.
+- Эта git-история: ветвление, сообщения в формате Conventional Commits,
+  структура мержей в стиле GitFlow.
+- Диагностика всех багов, перечисленных ниже.
 
-## What was done independently
+## Что было сделано самостоятельно
 
-- All product/scope decisions: what to build first, which ToR bonus items to
-  defer, when a fix was "good enough" versus needed more work.
-- Actually *playing* the running game in the Editor and reporting real UX
-  problems by eye - the AI could run the game headlessly and read logs, but every
-  visual bug below (see "Bugs found") was first noticed by a human looking at the
-  screen, not caught by the AI on its own.
-- Deciding on GitHub CLI (`gh`) over manual repo creation, and directing when to
-  restart the Unity Editor for engine-level settings changes to take effect.
-- Reviewing and approving each phase of work before moving to the next.
+- Все решения по продукту/объёму задачи: что делать первым, какие
+  бонусные пункты ТЗ отложить, когда фикс «достаточно хорош», а когда
+  нужно доработать.
+- Собственно *игра* в запущенную игру в редакторе и репорты о реальных
+  UX-проблемах на глаз — AI мог запускать игру безголово и читать логи,
+  но каждый визуальный баг ниже (см. «Баги») был впервые замечен
+  человеком, смотрящим на экран, а не найден AI самостоятельно.
+- Решение использовать GitHub CLI (`gh`) вместо ручного создания
+  репозитория, и указания, когда перезапускать Unity Editor, чтобы
+  применились изменения настроек уровня движка.
+- Проверка и одобрение каждого этапа работы перед переходом к следующему.
 
-## A few representative prompts
+## Несколько характерных промптов
 
-- "сделай lock unlock для заводов и так далее по ТЗ" - after the base economy
-  existed, this drove adding the actual lock/unlock UI state and interaction.
-- "сделай улучшение (upgrade) машин тоже наглядно" - led to the per-level color
-  badge and upgrade pulse animation on `MachineRowView`.
-- "оптимизацию под экраны телефонов андроид обычных" - drove the Android
-  platform settings pass and, later, the SafeArea helper.
-- "нажимаю купить коины, в всплывающей менюшке кнопки не нажимаются но с
-  открытым окном нажимаю на кнопку купить коины (которая находится за окном)
-  все покупается" - this single bug report is what led to discovering the
-  Active Input Handling / legacy OnGUI conflict below.
-- "улучши немного графику, может цвета и фон какой нибудь" - drove the color
-  palette, card backgrounds and rounded-sprite pass on the UI.
+- «сделай lock unlock для заводов и так далее по ТЗ» — после того как
+  базовая экономика уже была готова, это привело к добавлению реального
+  UI-состояния lock/unlock и взаимодействия с ним.
+- «сделай улучшение (upgrade) машин тоже наглядно» — привело к цветному
+  бейджу уровня и анимации пульсации при апгрейде в `MachineRowView`.
+- «оптимизацию под экраны телефонов андроид обычных» — запустило проход
+  по настройкам Android-платформы, а позже — компонент SafeArea.
+- «нажимаю купить коины, в всплывающей менюшке кнопки не нажимаются но с
+  открытым окном нажимаю на кнопку купить коины (которая находится за
+  окном) все покупается» — именно этот репорт привёл к обнаружению
+  конфликта Active Input Handling / legacy OnGUI, описанного ниже.
+- «улучши немного графику, может цвета и фон какой нибудь» — запустило
+  проход по цветовой палитре, карточкам-подложкам и скруглённым спрайтам
+  в UI.
+- «а где почему-то на телефоне при нажатии на кнопку купить коины ничего
+  не происходит» — привело к находке настоящего бага с
+  `BillingMode.json` (реальная сборка пыталась подключиться к настоящему
+  Google Play Billing вместо Fake Store).
 
-## Suggestions changed or self-corrected
+## Изменённые или самостоятельно исправленные предложения
 
-Nothing was explicitly rejected by the reviewer in this session (proposed
-approaches were generally accepted), but the AI corrected itself more than
-once when its own first attempt turned out wrong on closer inspection:
+Явно отклонённых ревьюером предложений в этой сессии не было (предложенные
+подходы в целом принимались), но AI больше одного раза само себя
+поправляло, когда первая попытка при ближайшем рассмотрении оказывалась
+неверной:
 
-- The first `UnityPurchasingService` draft used the classic
-  `IStoreListener` / `ConfigurationBuilder` API, which still compiles but is
-  marked obsolete in IAP v5. It was rewritten to use the new
-  `StoreController` / `UnityIAPServices` API after checking the package's
-  own source and changelog, instead of shipping code that compiles with
-  warnings.
-- `Machine.NextUpgradeCost`'s first version charged the growth multiplier
-  starting from the very first upgrade, which one of the AI's own unit tests
-  then caught as an off-by-one in the pricing curve; the formula was fixed
-  rather than adjusting the test to match the bug.
+- Первый вариант `UnityPurchasingService` использовал классический API
+  `IStoreListener` / `ConfigurationBuilder`, который всё ещё компилируется,
+  но помечен как устаревший в IAP v5. Он был переписан на новый API
+  `StoreController` / `UnityIAPServices` после проверки исходников и
+  changelog самого пакета, вместо того чтобы оставить код, компилирующийся
+  с предупреждениями.
+- Первая версия `Machine.NextUpgradeCost` начисляла множитель роста уже
+  с самого первого улучшения — это поймал один из юнит-тестов, написанных
+  самим AI, как off-by-one в кривой цен; формулу исправили, а не подогнали
+  тест под баг.
 
-## Bugs / questionable decisions the AI found
+## Баги / спорные решения, которые AI нашёл
 
-A genuinely useful side effect of building this interactively: several bugs
-were found and root-caused during the session rather than left for later.
+Реально полезный побочный эффект интерактивной разработки: несколько
+багов были найдены и доведены до корневой причины прямо в сессии, а не
+оставлены на потом.
 
-- **Upgrade pricing off-by-one** - the first upgrade after unlocking cost
-  `baseCost * growth`, not `baseCost`, because `NextUpgradeCost` used the
-  post-unlock level directly instead of the upgrade count. Caught by a
-  failing unit test, not by manual play.
-- **Crash on quit during init** - `GameBootstrap.OnApplicationQuit` could
-  throw a `NullReferenceException` if it fired before `Awake` finished.
-  Found via the Console, fixed with a null guard.
-- **Fake Store "Cancel" appearing to hang** - `UnityPurchasingService`'s
-  purchase-failure handler could throw when a cancelled order's cart was
-  empty; the exception unwound into Unity IAP's own dialog-close code and
-  left its window stuck. Root-caused by reading `UIFakeStore.cs` in the
-  installed package, then fixed by making the handler null-safe and
-  exception-safe.
-- **Fake Store buttons not responding to clicks at all** - traced to the
-  project's Active Input Handling being set to "Input System Package (New)"
-  only; Unity's Fake Store dialog renders with legacy `OnGUI()`, which
-  needs the old input backend. Switched to "Both".
-- **UI elements inflated 15-45% beyond their intended size** - creating
-  GameObjects under the (CanvasScaler-scaled) Canvas via Editor scripting
-  causes Unity to write a compensating non-1 `localScale` to preserve
-  apparent world size, which is meaningless for a freshly-created UI element
-  and silently corrupts layout math. Found by comparing measured vs.
-  expected on-screen bounds; fixed by resetting `localScale` to `(1,1,1)`
-  across the whole UI hierarchy.
-- **The whole game appeared to freeze intermittently** - `Application
-  .runInBackground` defaulted to `false`, so the entire Player Loop
-  (`Update`, coroutines, even deferred `Object.Destroy`) paused whenever the
-  Editor window lost OS focus. This explained several previously-confusing
-  "stuck" symptoms across the session and was fixed both in code
-  (`GameBootstrap.Awake`) and in Player Settings.
-- **UI overflowing the screen edge on some phones** - several elements used
-  a fixed width sized for exactly the 1080-unit reference canvas instead of
-  stretch anchors, so they clipped past the right edge on phone aspect
-  ratios taller than the reference. Fixed by switching those elements to
-  margin-based stretch anchoring.
+- **Off-by-one в цене улучшения** — первое улучшение после открытия
+  стоило `baseCost * growth`, а не `baseCost`, потому что
+  `NextUpgradeCost` использовал уровень сразу после открытия вместо
+  количества уже сделанных улучшений. Пойман юнит-тестом, а не ручной
+  игрой.
+- **Креш при выходе во время инициализации** —
+  `GameBootstrap.OnApplicationQuit` мог выбросить
+  `NullReferenceException`, если сработал раньше, чем завершился `Awake`.
+  Найдено через консоль, исправлено защитой на `null`.
+- **Кнопка «Cancel» в Fake Store выглядела зависшей** — обработчик
+  неудачной покупки в `UnityPurchasingService` мог выбросить исключение,
+  когда корзина отменённого заказа была пустой; это исключение
+  «разматывалось» прямо в код закрытия диалога самого Unity IAP и
+  оставляло его окно зависшим. Корневая причина найдена через чтение
+  `UIFakeStore.cs` в установленном пакете, исправлено — обработчик стал
+  безопасным к `null` и к исключениям.
+- **Кнопки Fake Store вообще не реагировали на клики** — оказалось, что
+  Active Input Handling проекта был выставлен только на «Input System
+  Package (New)»; диалог Fake Store в Unity рисуется через устаревший
+  `OnGUI()`, которому нужен старый input-backend. Переключено на «Both».
+- **UI-элементы были раздуты на 15–45% сверх задуманного размера** —
+  создание GameObject'ов под (отмасштабированным через CanvasScaler)
+  Canvas через Editor-скрипты заставляет Unity записывать компенсирующий
+  не-единичный `localScale`, чтобы сохранить видимый размер в мире — для
+  только что созданного UI-элемента это не имеет смысла и незаметно
+  портит математику layout. Найдено сравнением измеренных и ожидаемых
+  границ на экране; исправлено сбросом `localScale` в `(1,1,1)` по всей
+  иерархии UI.
+- **Вся игра периодически «зависала»** — `Application.runInBackground` по
+  умолчанию был `false`, из-за чего весь Player Loop (`Update`, корутины,
+  даже отложенный `Object.Destroy`) останавливался, когда окно редактора
+  теряло фокус ОС. Это объяснило несколько ранее непонятных симптомов
+  «зависания» за сессию и было исправлено и в коде
+  (`GameBootstrap.Awake`), и в Player Settings.
+- **UI выходил за край экрана на некоторых телефонах** — несколько
+  элементов использовали фиксированную ширину, рассчитанную ровно на
+  1080-юнитный референсный canvas, вместо stretch-анкоров, поэтому они
+  обрезались по правому краю на пропорциях экрана более вытянутых, чем
+  референсная. Исправлено переводом этих элементов на stretch-анкоринг с
+  отступами.
+- **Покупка на реальном телефоне не реагировала на нажатие** —
+  `Assets/Resources/BillingMode.json` был выставлен в
+  `{"androidStore":"GooglePlay"}`, поэтому в реальной сборке (в отличие от
+  редактора) Unity IAP пытался подключиться к настоящему Google Play
+  Billing, для которого нет ни зарегистрированного продукта, ни
+  правильного package name — инициализация IAP тихо проваливалась без
+  какой-либо видимой реакции. Исправлено на `{"androidStore":"fake"}`,
+  чтобы Fake Store использовался и в реальной сборке, как и предполагает
+  ТЗ.
