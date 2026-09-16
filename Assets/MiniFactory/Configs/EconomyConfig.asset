@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a5ce18b762b5464faf3b6ddc3e18729, type: 3}
+  m_Name: EconomyConfig
+  m_EditorClassIdentifier: Assembly-CSharp::MiniFactory.Config.EconomyConfig
+  machines:
+  - id: conveyor
+    displayName: Conveyor Belt
+    unlockCost: 0
+    baseProduction: 1
+    productionGrowthPerLevel: 1.15
+    baseUpgradeCost: 20
+    upgradeCostGrowthPerLevel: 1.2
+  - id: press
+    displayName: Press Machine
+    unlockCost: 50
+    baseProduction: 3
+    productionGrowthPerLevel: 1.15
+    baseUpgradeCost: 40
+    upgradeCostGrowthPerLevel: 1.22
+  - id: assembler
+    displayName: Assembler
+    unlockCost: 250
+    baseProduction: 8
+    productionGrowthPerLevel: 1.17
+    baseUpgradeCost: 100
+    upgradeCostGrowthPerLevel: 1.25
+  boostEnabled: 1
+  boostDurationSeconds: 30
+  boostMultiplier: 2
+  maxOfflineSeconds: 3600
